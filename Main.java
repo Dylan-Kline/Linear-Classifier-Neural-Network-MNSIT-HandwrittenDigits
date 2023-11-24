@@ -2,7 +2,6 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -36,6 +35,8 @@ public class Main {
 
                 Example example = new Example(inputs_data, output_data);
                 examples.add(example);
+
+                System.out.println(example);
             }
 
         }
@@ -55,7 +56,8 @@ public class Main {
             }
         }
 
-        int num_inputs = 0;
+        int num_inputs = examples.get(0).inputs.length;
         PerceptronClassifier perceptron = new PerceptronClassifier(num_inputs);
+        perceptron.train(examples, 700, 1);
     }
 }

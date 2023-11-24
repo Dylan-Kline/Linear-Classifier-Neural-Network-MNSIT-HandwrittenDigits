@@ -19,7 +19,7 @@ public class PerceptronClassifier extends LinearClassifier {
         for (int i = 0; i < inputs.length; i++) {
             double weight = this.weights[i];
             double current_input = inputs[i];
-            double threshold_val = threshold(VectorOps.dot_product(this.weights, inputs));
+            double threshold_val = this.threshold(VectorOps.dot_product(this.weights, inputs));
             this.weights[i] = weight + alpha * (output - threshold_val) * current_input;
         }
 

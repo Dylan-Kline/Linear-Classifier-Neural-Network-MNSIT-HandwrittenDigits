@@ -44,8 +44,8 @@ abstract class LinearClassifier {
             /* Randomly grab an example from the list of examples to train on */
             int example_index = random.nextInt(num_of_examples);
             Example example = examples.get(example_index);
-            update(example.inputs, example.output, schedule.alpha(i));
-            training_report(examples, i + 1);
+            this.update(example.inputs, example.output, schedule.alpha(i));
+            this.training_report(examples, i + 1);
         }
     }
 
@@ -74,6 +74,6 @@ abstract class LinearClassifier {
             }
         }
 
-        return num_correct;
+        return (double)num_correct / examples.size();
     }
 }
