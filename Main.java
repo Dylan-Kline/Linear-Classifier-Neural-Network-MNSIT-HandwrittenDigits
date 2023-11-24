@@ -55,6 +55,7 @@ public class Main {
                 }
             }
         }
+        System.out.print("HI");
 
         int num_inputs = examples.get(0).inputs.length;
         PerceptronClassifier perceptron = new PerceptronClassifier(num_inputs);
