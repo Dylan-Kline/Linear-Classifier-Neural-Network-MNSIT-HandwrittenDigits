@@ -1,5 +1,8 @@
 package learn;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Random;
 
@@ -38,15 +41,23 @@ abstract class LinearClassifier {
         Random random = new Random();
         int num_of_examples = examples.size();
 
-        /* Uses a stochastic learning methodology to train the model with the examples for the num_steps */
-        for (int i = 0; i < num_steps; i++) {
+        try (PrintWriter writer = new PrintWriter(new File("training_data.csv"))) {
+            writer.println("Step,Accuracy"); // Header for CSV file
 
-            /* Randomly grab an example from the list of examples to train on */
-            int example_index = random.nextInt(num_of_examples);
-            Example example = examples.get(example_index);
-            this.update(example.inputs, example.output, schedule.alpha(i));
-            this.training_report(examples, i + 1);
+            /* Uses a stochastic learning methodology to train the model with the examples for the num_steps */
+            for (int i = 0; i < num_steps; i++) {
+
+                /* Randomly grab an example from the list of examples to train on */
+                int example_index = random.nextInt(num_of_examples);
+                Example example = examples.get(example_index);
+                this.update(example.inputs, example.output, schedule.alpha(i + 1));
+                this.training_report(examples, i + 1, writer);
+            }
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
         }
+    
     }
 
     /* Trains the model with the given set of examples using a constant learning rate */
@@ -57,8 +68,10 @@ abstract class LinearClassifier {
     }
 
     /* Training report that prints out the current step number and the accuracy  */
-    private void training_report(List<Example> examples, int step_num) {
-        System.out.println("Step num: " + step_num + "\t" + "Accuracy: " + accuracy(examples));
+    private void training_report(List<Example> examples, int step_num, PrintWriter writer) {
+        double acc = accuracy(examples);
+        System.out.println("Step num: " + step_num + "\t" + "Accuracy: " + acc);
+        writer.println(step_num + "," + acc);
     }
 
     // (squaredErrorPerSample squared error function that returns the result of the total L2 loss divided by the number of examples
