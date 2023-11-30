@@ -88,6 +88,7 @@ public class Main {
             iteration_count = 5000;
         }
 
+        /* Parse the file for the data to use for training */
         BufferedReader reader = null;
         List<Example> examples = new ArrayList<>();
 
