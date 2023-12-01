@@ -87,6 +87,6 @@ abstract class LinearClassifier {
             }
         }
 
-        return (double)num_correct / examples.size();
+        return num_correct / (double)examples.size();
     }
 }
