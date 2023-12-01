@@ -161,18 +161,32 @@ public class Main {
             
             PerceptronClassifier perceptron = new PerceptronClassifier(num_inputs);
             if (rate_type == 1) {
-                double learning_rate = 0.05;
-                perceptron.train(examples, iteration_count, learning_rate);
+                double constant_learning_rate = 0.001;
+                perceptron.train(examples, iteration_count, constant_learning_rate);
+                System.out.println("Perceptron Classifier with a constant learning rate has finished training.");
             }
             else {
-                DecayingLearningRateSchedule learning_rate = new DecayingLearningRateSchedule();
-                perceptron.train(examples, iteration_count, learning_rate);
+                DecayingLearningRateSchedule decaying_learning_rate = new DecayingLearningRateSchedule();
+                perceptron.train(examples, iteration_count, decaying_learning_rate);
+                System.out.println("Perceptron Classifier with a decaying learning rate has finished training.");
             }
-            
+
         }
         else if (classifier_type == 2) {
+
             LogisticClassifier logistic = new LogisticClassifier(num_inputs);
-            logistic.train(examples, iteration_count, 0.05);
+
+            if (rate_type == 1) {
+                double constant_log_learning_rate = 0.05;
+                logistic.train(examples, iteration_count, constant_log_learning_rate);
+                System.out.println("Logistic Classifier with a constant rate has finished training.");
+            }
+            else {
+                DecayingLearningRateSchedule decaying_log_learning_rate = new DecayingLearningRateSchedule();
+                logistic.train(examples, iteration_count, decaying_log_learning_rate);
+                System.out.println("Logistic Classifier with a decaying rate has finished training.");
+            }
+
         }
 
         scanner.close();
