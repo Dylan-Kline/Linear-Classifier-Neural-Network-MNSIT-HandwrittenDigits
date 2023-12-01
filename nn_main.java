@@ -112,7 +112,7 @@ public class nn_main {
         }
 
         MultiLayerFeedForwardNeuralNetwork nn = new MultiLayerFeedForwardNeuralNetwork(4, 7, 3);
-        List<Double> accuracies = nn.train(examples, epochs, 0.1);
+        List<Double> accuracies = nn.train(examples, epochs, 0.2);
         export_training_data(accuracies, "training_data.csv");
 
         scanner.close();
