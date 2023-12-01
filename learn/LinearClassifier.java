@@ -81,7 +81,7 @@ abstract class LinearClassifier {
         double num_correct = 0.0;
         for (Example example : examples) {
             double result = evaluate(example.inputs);
-
+            result = (result >= 0.5) ? 1.0 : 0.0;
             if (result == example.output) {
                 num_correct += 1;
             }

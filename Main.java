@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import learn.PerceptronClassifier;
 import learn.DecayingLearningRateSchedule;
 import learn.Example;
+import learn.LogisticClassifier;
 
 public class Main {
 
@@ -36,6 +37,29 @@ public class Main {
             }
         }
         while (classifier_type < 1 || classifier_type > 2);
+
+        System.out.println();
+
+        /* Ask the user to select an alpha type for training */
+        System.out.println("Select the type of learning rate schedule you wish to train with: ");
+        System.out.println("    1: Constant rate");
+        System.out.println("    2: Decaying rate");
+        System.out.print("Enter a choice: ");
+
+        int rate_type = 0;
+        do {
+            while (!scanner.hasNextInt()) {
+                System.out.println("Please enter a valid input.");
+                scanner.next();
+            }
+
+            rate_type = scanner.nextInt();
+
+            if (rate_type < 1 || rate_type > 2) {
+                System.out.println("Enter either 1 or 2.");
+            }
+        }
+        while (rate_type < 1 || rate_type > 2);
 
         System.out.println();
 
@@ -133,9 +157,22 @@ public class Main {
 
         int num_inputs = examples.get(0).inputs.length;
 
-        if (classifier_type == 1) {     
+        if (classifier_type == 1) { 
+            
             PerceptronClassifier perceptron = new PerceptronClassifier(num_inputs);
-            perceptron.train(examples, iteration_count, new DecayingLearningRateSchedule());
+            if (rate_type == 1) {
+                double learning_rate = 0.05;
+                perceptron.train(examples, iteration_count, learning_rate);
+            }
+            else {
+                DecayingLearningRateSchedule learning_rate = new DecayingLearningRateSchedule();
+                perceptron.train(examples, iteration_count, learning_rate);
+            }
+            
+        }
+        else if (classifier_type == 2) {
+            LogisticClassifier logistic = new LogisticClassifier(num_inputs);
+            logistic.train(examples, iteration_count, 0.05);
         }
 
         scanner.close();
