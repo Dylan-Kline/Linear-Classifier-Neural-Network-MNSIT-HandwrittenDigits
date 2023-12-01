@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -67,9 +68,9 @@ public class nn_main {
         BufferedReader reader = null;
         List<Example> examples = new ArrayList<>();
         Map<String, double[]> classMapping = new HashMap<>();
-        classMapping.put("Iris-setosa", new double[]{1, 0, 0});
-        classMapping.put("Iris-versicolor", new double[]{0, 1, 0});
-        classMapping.put("Iris-virginica", new double[]{0, 0, 1});
+        classMapping.put("Iris-setosa", new double[]{1.0, 0.0, 0.0});
+        classMapping.put("Iris-versicolor", new double[]{0.0, 1.0, 0.0});
+        classMapping.put("Iris-virginica", new double[]{0.0, 0.0, 1.0});
 
         try {
             reader = new BufferedReader(new FileReader(filename));
@@ -88,6 +89,7 @@ public class nn_main {
                 double[] outputs = classMapping.get(string_data[string_data.length - 1]);
 
                 if (outputs != null) {
+                    // System.out.println("Input: " + inputs_data[0] + " " + inputs_data[1] + " " + inputs_data[2] + " " + inputs_data[3] + " Output: " + outputs[0] + " " + outputs[1] + " " + outputs[2]);
                     examples.add(new Example(inputs_data, outputs));
                 }
             }
@@ -110,8 +112,20 @@ public class nn_main {
         }
 
         MultiLayerFeedForwardNeuralNetwork nn = new MultiLayerFeedForwardNeuralNetwork(4, 7, 3);
-        nn.train(examples, epochs, .01);
+        List<Double> accuracies = nn.train(examples, epochs, 0.1);
+        export_training_data(accuracies, "training_data.csv");
 
         scanner.close();
+    }
+
+    private static void export_training_data(List<Double> accuracies, String filename) {
+        try (PrintWriter out = new PrintWriter(filename)) {
+            out.println("Epoch,Accuracy");
+            for (int i = 0; i < accuracies.size(); i++) {
+                out.println((i + 1) + "," + accuracies.get(i));
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -1,5 +1,6 @@
 package nn;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -106,8 +107,10 @@ public class MultiLayerFeedForwardNeuralNetwork extends FeedForwardNeuralNetwork
 	/**
 	 * AIMA BACK-PROP-LEARNING algorithm (Fig 18.24).
 	 */
-	public void train(List<Example> examples, int epochs, double alpha) {
+	public List<Double> train(List<Example> examples, int epochs, double alpha) {
 		initializeWeights();
+		List<Double> accuracies = new ArrayList<>();
+
 		// ``until some stopping criterion is specified'' (we use a fixed number of epochs)
 		for (int epoch=1; epoch <= epochs; epoch++) {
 			notifyTrainingEpochStarted(epoch);
@@ -115,7 +118,15 @@ public class MultiLayerFeedForwardNeuralNetwork extends FeedForwardNeuralNetwork
 				train(example, alpha);
 			}
 			notifyTrainingEpochCompleted(epoch);
+
+			// Calculate the accuracy of the network after each epoch
+			double accuracy = test(examples);
+			accuracies.add(accuracy);
+			System.out.println("Epoch: " + epoch + " Accuracy: " + accuracy);
+
 		}
+
+		return accuracies;
 	}
 	
 	/**
@@ -181,56 +192,40 @@ public class MultiLayerFeedForwardNeuralNetwork extends FeedForwardNeuralNetwork
 	 */
 	public void backprop(Example example, double alpha) {
 
-        // (2) Compute error vector delta for output layer
-        NeuronUnit[] outputLayer = this.getOutputUnits();
-        double[] outputDeltas = new double[outputLayer.length];
-
-		// for each node j in the output layer do
-		//     Delta[j] <- g'(in_j) \times (y_j - a_j)
-		LogisticUnit unit = new LogisticUnit();
-        for (int j = 0; j < outputLayer.length; j++) {
-            NeuronUnit neuron = outputLayer[j];
-            double a_j = neuron.getOutput();
-            double y_j = example.outputs[j]; 
-            outputDeltas[j] = unit.activationPrime(neuron.getInputSum()) * (y_j - a_j);
-        }
-
-        // (3) Propagate deltas backward
-		// for l = L-1 to 1 do
-		//     for each node i in layer l do
-		//         Delta[i] <- g'(in_i) * \sum_j w_ij Delta[j]	
-        for (int l = layers.length - 2; l >= 1; l--) { // Skip the output layer
-			NeuronUnit[] currentLayer = this.getLayerUnits(l);
-			NeuronUnit[] nextLayer = this.getLayerUnits(l + 1);
-			double[] layerDeltas = new double[currentLayer.length];
-		
-			for (int i = 0; i < currentLayer.length; i++) {
-				NeuronUnit neuron = currentLayer[i];
-				double sum = 0.0;
-		
-				for (int j = 0; j < nextLayer.length; j++) {
-					sum += nextLayer[j].getWeight(i) * outputDeltas[j]; // Note: Adjust indexing based on your network structure
-				}
-		
-				layerDeltas[i] = unit.activationPrime(neuron.getInputSum()) * sum;
-			}
-			outputDeltas = layerDeltas;
+		NeuronUnit[] outputUnits = getOutputUnits();
+		LogisticUnit lunit = new LogisticUnit();
+		// Step 1: Compute output layer deltas
+		for (int i = 0; i < outputUnits.length; i++) {
+			double ai = outputUnits[i].getOutput();
+			double yi = example.outputs[i];
+			double delta = lunit.activationPrime(outputUnits[i].getInputSum()) * (yi - ai);
+			outputUnits[i].delta = delta;
 		}
-
-        // (4) Update every weight in network using deltas
-		// for each weight w_ij in network do
-		//     w_ij <- w_ij + alpha * a_i * delta_j
-        for (int l = 1; l < layers.length; l++) {
-            NeuronUnit[] layer = this.getLayerUnits(l);
-            for (int i = 0; i < layer.length; i++) {
-                NeuronUnit neuron = layer[i];
-                for (int j = 0; j < neuron.incomingConnections.size(); j++) {
-                    double a_i = neuron.incomingConnections.get(j).src.getOutput();
-                    double delta_j = outputDeltas[i];
-                    double newWeight = neuron.getWeight(j) + alpha * a_i * delta_j;
-                    neuron.setWeight(j, newWeight);
-                }
-            }
+		
+		// Step 2: Compute hidden layers deltas
+		for (int l = this.layers.length - 2; l > 0; l--) {
+			NeuronUnit[] layer = getLayerUnits(l);
+			NeuronUnit[] nextLayer = getLayerUnits(l + 1);
+			for (int i = 0; i < layer.length; i++) {
+				double sum = 0;
+				for (NeuronUnit unit : nextLayer) {
+					sum += unit.delta * unit.getWeight(i + 1);
+				}
+				double delta = lunit.activationPrime(layer[i].getInputSum()) * sum;
+				layer[i].delta = delta;
+			}
+		}
+	
+		// Step 3: Update all weights
+		for (int l = 1; l < this.layers.length; l++) {
+			NeuronUnit[] layer = getLayerUnits(l);
+			for (NeuronUnit unit : layer) {
+				for (Connection conn : unit.incomingConnections) {
+					double ai = conn.src.getOutput();
+					double deltaWeight = alpha * ai * unit.delta;
+					conn.weight += deltaWeight;
+				}
+			}
 		}
 	}
 
@@ -253,6 +248,9 @@ public class MultiLayerFeedForwardNeuralNetwork extends FeedForwardNeuralNetwork
 		propagate(example);
 		// Determine which output unit has highest activation
 		int prediction = getOutputValue();
+		// System.out.println("Example inputs: " + example.inputs[0] + " " + example.inputs[1] + " " + example.inputs[2] + " " + example.inputs[3]);
+		// System.out.println("Example outputs: " + example.outputs[0] + " " + example.outputs[1] + " " + example.outputs[2]);
+		// System.out.println("Prediction index: " + prediction + " Example index: " + example.outputs[prediction]);
 		// Return true if that's the one that's supposed to be on according to the example
 		boolean result = (example.outputs[prediction] == 1.0);
 		return result;
