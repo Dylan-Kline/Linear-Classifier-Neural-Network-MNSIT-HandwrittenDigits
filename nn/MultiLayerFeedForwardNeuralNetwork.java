@@ -122,7 +122,7 @@ public class MultiLayerFeedForwardNeuralNetwork extends FeedForwardNeuralNetwork
 			// Calculate the accuracy of the network after each epoch
 			double accuracy = test(examples);
 			accuracies.add(accuracy);
-			System.out.println("Epoch: " + epoch + " Accuracy: " + accuracy);
+			System.out.println("Epoch: " + epoch + " Accuracy: " + accuracy + " Error: " + (1 - accuracy));
 
 		}
 
